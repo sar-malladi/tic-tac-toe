@@ -1,7 +1,13 @@
 import random
 import time
+import sys 
         
+board = []
+winner = ""
+nextMover = "player"
+
 def setWinner():
+    global board
     #check rows using set, which sees if all the elements of a list are the same
     for row in board:
         if len(set(row)) <= 1:
@@ -29,6 +35,7 @@ def setWinner():
     return ""
             
 def isEmpty(r, c):
+    global board
     if board[r][c] == "   ":
         return True
 
@@ -41,6 +48,7 @@ def generateEmptySquaresList():
     return emptySquaresList
 
 def computerMove(): 
+    global board
     randomEmptySquare = random.choice(generateEmptySquaresList())
     chosenRow = int(randomEmptySquare[0])
     chosenCol = int(randomEmptySquare[1])
@@ -48,22 +56,34 @@ def computerMove():
     visualizeBoard(board)
 
 def playerMove():
-    moveRow = input("Enter the row number (1-3) of your move: ")
-    moveCol = input("Enter the column number (1-3) of your move: ")
+    import sys  # Needed for sys.exit()
+
+def playerMove():
+    global board
+    moveRow = input("Enter the row number (1-3) of your move, or 'q' to quit: ").strip()
+    if moveRow.lower() == "q":
+        print("Thanks for playing!\nExiting the game...")
+        sys.exit()
+    
+    moveCol = input("Enter the column number (1-3) of your move, or 'q' to quit: ").strip()
+    if moveCol.lower() == "q":
+        print("Thanks for playing!\nExiting the game...")
+        sys.exit()
+
     try:
         moveRow = int(moveRow) - 1
         moveCol = int(moveCol) - 1
         if moveRow < 0 or moveRow > 2 or moveCol < 0 or moveCol > 2:
-            print("Try again- you must select 1, 2, or 3.")
+            print("Try again — you must select 1, 2, or 3.")
             playerMove()
         elif isEmpty(moveRow, moveCol):
             board[moveRow][moveCol] = " X "
             visualizeBoard(board)
         else:
-            print ("Try again- you may only select an empty square.")
+            print("Try again — you may only select an empty square.")
             playerMove()
     except:
-        print ("Try again- your selected row and column must be a number.")
+        print("Try again — your selected row and column must be a number.")
         playerMove()
 
 def visualizeBoard (b):
@@ -77,34 +97,44 @@ def visualizeBoard (b):
             #if on the 1st or 2nd row
             print("\n --+---+--")
             
-board = [["   ", "   ", "   ",] , ["   ", "   ", "   "] , ["   ", "   ", "   "]]
-#Xboard = [[" X ", "   ", "   ",] , ["   ", " X ", "   "] , ["   ", "   ", " X "]]
+def playGame():
+    global board, winner, nextMover
+    board = [["   ", "   ", "   ",] , ["   ", "   ", "   "] , ["   ", "   ", "   "]]
+    
+    #reset nextMover and winner in case they are replaying the game
+    nextMover = "player"
+    winner = ""
+    
+    print("Let's play Tic Tac Toe!")
 
-print("Let's play Tic Tac Toe!")
+    while (winner == "" and len(generateEmptySquaresList()) != 0):
+        if nextMover == "player":
+            print("\nYour turn!")
+            playerMove()
+            winner = setWinner()
+            nextMover = "computer"
+        elif nextMover == "computer":
+            print("\nMy turn! Selecting a move...")
+            time.sleep(2)
+            computerMove()
+            winner = setWinner()
+            nextMover = "player"
 
-nextMover = "player"
-winner = ""
+    if (winner == "player"):
+        print ("You won the game! Final board:")
+    elif (winner == "computer"):
+        print ("You lost the game. Final board:")
+    else:
+        print ("It's a tie! Final board:")
+    visualizeBoard(board)
 
-while (winner == "" and len(generateEmptySquaresList()) != 0):
-    if nextMover == "player":
-        print("\nYour turn!")
-        playerMove()
-        winner = setWinner()
-        nextMover = "computer"
-    elif nextMover == "computer":
-        print("\nMy turn! Selecting a move...")
-        time.sleep(2)
-        computerMove()
-        winner = setWinner()
-        nextMover = "player"
+playGame()
 
-if (winner == "player"):
-    print ("You won the game! Final board:")
-elif (winner == "computer"):
-    print ("You lost the game. Final board:")
-else:
-    print ("It's a tie! Final board:")
-visualizeBoard(board)
+while input("\nPlay again? (y/n): ").lower() == "y":
+    playGame()
+
+print("Thanks for playing!")
+sys.exit()
 
 #at the end: try to use webscraping to scrape online tic-tac-toe games and user can watch?
 #            add a probability of player's chance of winning? go back and do #check columns the proper way instead of using zip, and maybe same for rows
